@@ -2,11 +2,19 @@ package com.company;
 
 public class Term {
     int hour, minute, duration;
+    Day day;
 
     Term(int hour, int minute) {
         this.hour = hour;
         this.minute = minute;
         this.duration = 90;
+    }
+
+    Term(int hour, int minute, Day day) {
+        this.hour = hour;
+        this.minute = minute;
+        this.duration = 90;
+        this.day = day;
     }
 
     public String toString() {
@@ -18,13 +26,14 @@ public class Term {
 
     public Boolean earlierThan(Term other) {
         if (this.hour < other.hour) return true;
-        if (this.minute < other.minute) return true;
+        if (this.minute <= other.minute) return true;
         return false;
     }
 
     public Boolean laterThan(Term other) {
-        if (this.hour == other.hour && this.minute == other.minute) return false;
-        return !earlierThan(other);
+        if (this.hour > other.hour) return true;
+        if (this.minute >= other.minute) return true;
+        return false;
     }
 
     public Term endTerm(Term other) {
