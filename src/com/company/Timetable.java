@@ -8,8 +8,6 @@ public class Timetable implements ITimetable{
 
     public Timetable() {
         lessons = new ArrayList<>();
-        lessons.add(new Lesson(new Term(8, 0, Day.MON), "ABC", "Jan", 2));
-        lessons.add(new Lesson(new Term(8, 0, Day.THU), "ABC", "Jan", 2));
     }
 
     @Override
@@ -17,10 +15,8 @@ public class Timetable implements ITimetable{
         ArrayList<Lesson> lessonsOnDay = new ArrayList<>();
 
         for (Lesson lesson : lessons) {
-            if (lesson.getTerm().getDay() == term.getDay()) {
-                if (!term.laterThan(lesson.getTerm().endTerm()) && !lesson.getTerm().laterThan(term.endTerm())) {
-                    return false;
-                }
+            if (this.busy(lesson.getTerm())) {
+                return false;
             }
         }
 
@@ -29,11 +25,18 @@ public class Timetable implements ITimetable{
 
     @Override
     public boolean busy(Term term) {
-        return term.getDay() == term.getDay() && term.getHour() == term.getHour() && term.getMinute() == term.getMinute();
+        for (Lesson lesson : lessons) {
+            if (lesson.getTerm().getDay() == term.getDay() && lesson.getTerm().getHour() == term.getHour() && lesson.getTerm().getMinute() == term.getMinute()) return true;
+        }
+        return false;
     }
 
     @Override
     public boolean put(Lesson lesson) {
+        if (!this.busy(lesson.getTerm())) {
+            lessons.add(lesson);
+            return true;
+        }
         return false;
     }
 
@@ -56,7 +59,8 @@ public class Timetable implements ITimetable{
                     lessons.get(id).earlierTime();
                     break;
             }
-            id = id++ % lessons.size();
+            id++;
+            id = id % lessons.size();
         }
     }
 
@@ -71,28 +75,46 @@ public class Timetable implements ITimetable{
     }
 
     public String toString() {
-        String result = "";
-        ITimetable timetable = new Timetable();
         Day firstDay = Day.MON;
         Day lastDay = Day.SUN;
-        Term firstTerm = new Term(8,0,firstDay);
-        Term lastTerm = new Term(20,0,lastDay);
+        Term firstTerm = new Term(8,0);
+        Term lastTerm = new Term(20,0);
         Day day = null;
         Term term = null;
-        for(day = firstDay ; day.compareTo(lastDay) <= 0 ; day = day.nextDay()){
-            result += day;
-            result += " ";
-            for(term = firstTerm ; term.earlierThan(lastTerm) ; term = term.endTerm()){
-                result += term;
-                if(timetable.busy(term)) {
-                    result += timetable.get(term);
-                    result += "\n";
-                }
-                else
-                    result += " \n";
-            }
-            if (day.compareTo(lastDay) == 0) break;
+
+        StringBuilder sb = new StringBuilder();
+        while (sb.length() < 10) sb.append(" ");
+
+        for (day = firstDay; ; day = day.nextDay()) {
+            StringBuilder sb_day = new StringBuilder(day.toString());
+            while(sb_day.length() < 14) sb_day.append(" ");
+            sb.append(sb_day);
+            sb.append(" ");
+            if (day.ordinal() == 6) break;
         }
-        return result;
+
+        sb.append('\n');
+        for (term = firstTerm; term.earlierThan(lastTerm); term = term.endTerm()) {
+            sb.append(term);
+            sb.append(" ");
+            for (day = firstDay; day.compareTo(lastDay) <= 0; day = day.nextDay()) {
+                Term newTerm = new Term(term.getHour(), term.getMinute(), day);
+                StringBuilder sb_term = new StringBuilder();
+                if (this.busy(newTerm)) {
+                    Lesson l = (Lesson)this.get(newTerm);
+                    sb_term.append(l.getName());
+                    while(sb_term.length() < 14) sb_term.append(" ");
+                } else {
+                    while(sb_term.length() < 14) sb_term.append(" ");
+                }
+                sb.append(sb_term);
+                sb.append(" ");
+
+                if (day.ordinal() == 6) break;
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }
