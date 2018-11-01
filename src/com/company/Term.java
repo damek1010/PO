@@ -1,5 +1,7 @@
 package com.company;
 
+import java.sql.Time;
+
 public class Term {
     private int hour;
     private int minute;
@@ -20,10 +22,7 @@ public class Term {
     }
 
     public String toString() {
-        String h, m;
-        h = this.getHour() < 10 ? "0" + this.getHour() : "" + this.getHour();
-        m = this.getMinute() < 10 ? "0" + this.getMinute() : "" + this.getMinute();
-        return (h + ":" + m + "[" + this.getDuration() + "]");
+        return String.format("%02d:%02d [%d]", this.hour, this.minute, this.duration);
     }
 
     public Boolean earlierThan(Term other) {
