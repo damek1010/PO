@@ -67,6 +67,10 @@ public class Lesson {
                 this.setTerm(newTerm);
                 return true;
             }
+
+            if (TimetableWithBreaks.skipBreaks) {
+
+            }
         }
 
         return false;
