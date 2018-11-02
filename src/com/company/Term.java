@@ -1,17 +1,18 @@
 package com.company;
 
-import java.sql.Time;
-
-public class Term {
-    private int hour;
-    private int minute;
-    private int duration;
+public class Term extends BasicTerm{
     private Day day;
 
     Term(int hour, int minute) {
         this.setHour(hour);
         this.setMinute(minute);
         this.setDuration(90);
+    }
+
+    Term(int hour, int minute, int duration) {
+        this.setHour(hour);
+        this.setMinute(minute);
+        this.setDuration(duration);
     }
 
     Term(int hour, int minute, Day day) {
@@ -26,56 +27,34 @@ public class Term {
     }
 
     public Boolean earlierThan(Term other) {
-//        if (this.day != other.day) return this.day.ordinal() < other.day.ordinal();
-        int m1 = this.hour * 60 + this.minute;
-        int m2 = other.hour * 60 + other.minute;
-        return m1 < m2;
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
+        return thisTimeInMinutes <= otherTimeInMinutes;
     }
 
     public Boolean laterThan(Term other) {
-//        if (this.day != other.day) return this.day.ordinal() > other.day.ordinal();
-        int m1 = this.hour * 60 + this.minute;
-        int m2 = other.hour * 60 + other.minute;
-        return m1 > m2;
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
+        return thisTimeInMinutes >= otherTimeInMinutes;
     }
 
+    //returns term with duration that equals difference between "other" and this time
+    //returned term begins at this time and ends at other time
     public Term endTerm(Term other) {
-        Term newTerm = new Term(this.getHour(), this.getMinute());
-        newTerm.setDuration((other.getHour() * 60 + other.getMinute()) - (newTerm.getHour() * 60 + newTerm.getMinute()));
-        return newTerm;
-    }
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
 
-    public Term endTerm() {
-        int m = this.getHour() * 60 + this.getMinute() + this.getDuration();
-        return new Term((m - m % 60) / 60,m % 60);
+        Term resultTerm = new Term(this.getHour(), this.getMinute());
+        resultTerm.setDuration(otherTimeInMinutes - thisTimeInMinutes);
+
+        return resultTerm;
     }
 
     public boolean equals(Term other) {
-        return (this.getHour() == other.getHour() && this.getMinute() == other.getMinute() && this.getDuration() == other.getDuration());
-    }
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
 
-    public int getHour() {
-        return hour;
-    }
-
-    public void setHour(int hour) {
-        this.hour = hour;
-    }
-
-    public int getMinute() {
-        return minute;
-    }
-
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
+        return (thisTimeInMinutes == otherTimeInMinutes && (this.day == other.day || this.day == null || other.day == null));
     }
 
     public Day getDay() {

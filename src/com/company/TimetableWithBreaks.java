@@ -3,74 +3,76 @@ package com.company;
 import java.sql.Time;
 import java.util.ArrayList;
 
-public class TimetableWithBreaks implements ITimetable {
+public class TimetableWithBreaks extends AbstractTimetable {
     private static Break[] breaks;
-    private ArrayList<Lesson> lessons;
 
     public static Boolean skipBreaks;
 
     public TimetableWithBreaks(Break[] breaks) {
         TimetableWithBreaks.breaks = breaks;
-        System.out.println(TimetableWithBreaks.breaks[0]);
+        TimetableWithBreaks.skipBreaks = true;
+        lessons = new ArrayList<>();
     }
 
     public Break getBreakAfterLesson(Term term) {
         for (Break lessonBreak : TimetableWithBreaks.breaks) {
-            if (term.endTerm().getHour() == lessonBreak.getTerm().getHour() && term.endTerm().getMinute() == lessonBreak.getTerm().getMinute())
+            if (term.endTerm().equals(lessonBreak.getTerm()))
                 return lessonBreak;
         }
         return null;
     }
 
+    public Break getBreakBeforeLesson(Term term) {
+        int index = 0;
+        for (Break lessonBreak : TimetableWithBreaks.breaks) {
+            if (term.equals(lessonBreak.getTerm().endTerm()))
+                return breaks[index - 1];
+
+            index++;
+        }
+
+        return null;
+    }
+
     @Override
     public boolean canBeTransferredTo(Term term, boolean full_time) {
-        ArrayList<Lesson> lessonsOnDay = new ArrayList<>();
+        if (this.busy(term)) return false;
 
-        for (Lesson lesson : lessons) {
-            if (this.busy(lesson.getTerm())) {
+        for (Break lessonBreak : TimetableWithBreaks.breaks) {
+            if (term.equals(lessonBreak.getTerm()))
+                return TimetableWithBreaks.skipBreaks;
+        }
+
+        switch (term.getDay()) {
+            case MON:
+            case TUE:
+            case WED:
+            case THU: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && full_time)
+                    return true;
+                return false;
+            }
+            case FRI: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(17, 0)) && full_time)
+                    return true;
+                if (term.laterThan(new Term(17, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && !full_time)
+                    return true;
+                return false;
+            }
+            case SAT:
+            case SUN: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && !full_time)
+                    return true;
                 return false;
             }
         }
 
-        for (Break lessonBreak : breaks) {
-            if (this.busy(lessonBreak.getTerm())) {
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
     @Override
     public boolean busy(Term term) {
-        for (Lesson lesson : lessons) {
-            if (lesson.getTerm().getDay() == term.getDay() && lesson.getTerm().getHour() == term.getHour() && lesson.getTerm().getMinute() == term.getMinute()) return true;
-        }
-        for (Break lessonBreak : breaks) {
-            if (lessonBreak.getTerm().getHour() == term.getHour() && lessonBreak.getTerm().getMinute() == term.getMinute()) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean put(Lesson lesson) {
-        if (!this.busy(lesson.getTerm())) {
-            lessons.add(lesson);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void perform(Action[] actions) {
-
-    }
-
-    @Override
-    public Object get(Term term) {
-        return null;
+        return this.get(term) != null;
     }
 
     public String toString() {
@@ -80,55 +82,43 @@ public class TimetableWithBreaks implements ITimetable {
         Term lastTerm = new Term(20, 0);
         Day day = null;
         Term term = null;
-
-        Boolean isBreak = false;
-        int i = 0;
+        boolean isBreak = false;
+        int breakNumber = 0;
 
         StringBuilder sb = new StringBuilder();
-        while (sb.length() < 10) sb.append(" ");
+        sb.append(String.format("%10s|", ""));
 
         for (day = firstDay; ; day = day.nextDay()) {
-            StringBuilder sb_day = new StringBuilder(day.toString());
-            while (sb_day.length() < 14) sb_day.append(" ");
+            StringBuilder sb_day = new StringBuilder(String.format("%-14s|", day.toString()));
             sb.append(sb_day);
-            sb.append(" ");
             if (day.ordinal() == 6) break;
         }
 
         sb.append('\n');
-        for (term = firstTerm; term.earlierThan(lastTerm);) {
-            if (!isBreak) {
-                sb.append(term);
-                sb.append(" ");
-                for (day = firstDay; day.compareTo(lastDay) <= 0; day = day.nextDay()) {
-                    Term newTerm = new Term(term.getHour(), term.getMinute(), day);
-                    StringBuilder sb_term = new StringBuilder();
-                    if (this.busy(newTerm)) {
-                        Lesson l = (Lesson) this.get(newTerm);
-                        sb_term.append(l.getName());
-                        while (sb_term.length() < 14) sb_term.append(" ");
-                    } else {
-                        while (sb_term.length() < 14) sb_term.append(" ");
-                    }
-                    sb.append(sb_term);
-                    sb.append(" ");
+        for (term = firstTerm; term.earlierThan(lastTerm); ) {
+            sb.append(String.format("%-10s|", term));
+            for (day = firstDay; day.compareTo(lastDay) <= 0; day = day.nextDay()) {
+                term.setDay(day);
+                StringBuilder sb_term = new StringBuilder();
+                if (this.busy(term)) {
+                    Lesson l = (Lesson) this.get(term);
+                    sb_term.append(String.format("%-14s|", l.getName()));
+                } else if (isBreak) {
+                    sb_term.append(String.format("%-14s|", " ").replace(" ", "-"));
+                } else {
+                    sb_term.append(String.format("%-14s|", ""));
+                }
+                sb.append(sb_term);
 
-                    if (day.ordinal() == 6) break;
-                }
-                if (i < TimetableWithBreaks.breaks.length)
-                    term = TimetableWithBreaks.breaks[i].getTerm();
-            } else {
-                if (i < TimetableWithBreaks.breaks.length) {
-                    StringBuilder sb_term = new StringBuilder();
-                    sb_term.append(breaks[i].getTerm());
-                    i++;
-                    while (sb_term.length() < 110) sb_term.append("-");
-                    sb.append(sb_term);
-                }
-                term = term.endTerm();
+                if (day.ordinal() == 6) break;
             }
-            isBreak = !isBreak;
             sb.append("\n");
+            isBreak = !isBreak;
+            if (isBreak && breakNumber < breaks.length) {
+                term = (Term) breaks[breakNumber].getTerm();
+                breakNumber++;
+            } else
+                term = term.endTerm();
         }
 
         return sb.toString();

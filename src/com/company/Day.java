@@ -1,7 +1,7 @@
 package com.company;
 
 public enum Day {
-    MON("Poniedziałek"), TUE("Wtorek"), WED("Sroda"), THU("Czwartek"), FRI("Piątek"), SAT("Sobota"), SUN("Niedziela");
+    MON("Poniedziałek"), TUE("Wtorek"), WED("Środa"), THU("Czwartek"), FRI("Piątek"), SAT("Sobota"), SUN("Niedziela");
 
     private String description;
     Day(String description) {
@@ -17,8 +17,7 @@ public enum Day {
     }
 
     public Day prevDay() {
-        int index = this.ordinal() - 1;
-        if (index < 0) index = 6;
+        int index = this.ordinal() > 0 ? this.ordinal() - 1 : Day.values().length - 1;
         return Day.values()[index];
     }
 

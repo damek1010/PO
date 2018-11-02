@@ -2,7 +2,7 @@ package com.company;
 
 import java.util.ArrayList;
 
-public class Timetable implements ITimetable{
+public class Timetable implements ITimetable {
 
     private ArrayList<Lesson> lessons;
 
@@ -12,23 +12,37 @@ public class Timetable implements ITimetable{
 
     @Override
     public boolean canBeTransferredTo(Term term, boolean full_time) {
-        ArrayList<Lesson> lessonsOnDay = new ArrayList<>();
-
-        for (Lesson lesson : lessons) {
-            if (this.busy(lesson.getTerm())) {
+        if (this.busy(term)) return false;
+        switch (term.getDay()) {
+            case MON:
+            case TUE:
+            case WED:
+            case THU: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && full_time)
+                    return true;
+                return false;
+            }
+            case FRI: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(17, 0)) && full_time)
+                    return true;
+                if (term.laterThan(new Term(17, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && !full_time)
+                    return true;
+                return false;
+            }
+            case SAT:
+            case SUN: {
+                if (term.laterThan(new Term(8, 0)) && term.endTerm().earlierThan(new Term(20, 0)) && !full_time)
+                    return true;
                 return false;
             }
         }
 
-        return true;
+        return false;
     }
 
     @Override
     public boolean busy(Term term) {
-        for (Lesson lesson : lessons) {
-            if (lesson.getTerm().getDay() == term.getDay() && lesson.getTerm().getHour() == term.getHour() && lesson.getTerm().getMinute() == term.getMinute()) return true;
-        }
-        return false;
+        return this.get(term) != null;
     }
 
     @Override
@@ -67,7 +81,7 @@ public class Timetable implements ITimetable{
     @Override
     public Object get(Term term) {
         for (Lesson lesson : lessons) {
-            if (lesson.getTerm().getDay() == term.getDay() && lesson.getTerm().getHour() == term.getHour() && lesson.getTerm().getMinute() == term.getMinute()) {
+            if (lesson.getTerm().equals(term)) {
                 return lesson;
             }
         }
@@ -77,38 +91,33 @@ public class Timetable implements ITimetable{
     public String toString() {
         Day firstDay = Day.MON;
         Day lastDay = Day.SUN;
-        Term firstTerm = new Term(8,0);
-        Term lastTerm = new Term(20,0);
+        Term firstTerm = new Term(8, 0);
+        Term lastTerm = new Term(20, 0);
         Day day = null;
         Term term = null;
 
         StringBuilder sb = new StringBuilder();
-        while (sb.length() < 10) sb.append(" ");
+        sb.append(String.format("%10s|", ""));
 
         for (day = firstDay; ; day = day.nextDay()) {
-            StringBuilder sb_day = new StringBuilder(day.toString());
-            while(sb_day.length() < 14) sb_day.append(" ");
+            StringBuilder sb_day = new StringBuilder(String.format("%-14s|", day.toString()));
             sb.append(sb_day);
-            sb.append(" ");
             if (day.ordinal() == 6) break;
         }
 
         sb.append('\n');
         for (term = firstTerm; term.earlierThan(lastTerm); term = term.endTerm()) {
-            sb.append(term);
-            sb.append(" ");
+            sb.append(String.format("%10s|", term));
             for (day = firstDay; day.compareTo(lastDay) <= 0; day = day.nextDay()) {
-                Term newTerm = new Term(term.getHour(), term.getMinute(), day);
+                term.setDay(day);
                 StringBuilder sb_term = new StringBuilder();
-                if (this.busy(newTerm)) {
-                    Lesson l = (Lesson)this.get(newTerm);
-                    sb_term.append(l.getName());
-                    while(sb_term.length() < 14) sb_term.append(" ");
+                if (this.busy(term)) {
+                    Lesson l = (Lesson) this.get(term);
+                    sb_term.append(String.format("%-14s|", l.getName()));
                 } else {
-                    while(sb_term.length() < 14) sb_term.append(" ");
+                    sb_term.append(String.format("%-14s|", ""));
                 }
                 sb.append(sb_term);
-                sb.append(" ");
 
                 if (day.ordinal() == 6) break;
             }

@@ -5,86 +5,102 @@ public class Lesson {
     private String name;
     private String teacherName;
     private int year;
-    private boolean full_time;
+    private boolean fullTime;
     private ITimetable timetable;
 
-    Lesson(Term term, String name, String teacherName, int year) {
+    Lesson(Term term, String name, String teacherName, int year, boolean fullTime) {
         this.setTerm(term);
         this.setName(name);
         this.setTeacherName(teacherName);
         this.setYear(year);
+        this.setFullTime(fullTime);
     }
 
-    Lesson(ITimetable timetable, Term term, String name, String teacherName, int year) {
+    Lesson(ITimetable timetable, Term term, String name, String teacherName, int year, boolean fullTime) {
         this.setTerm(term);
         this.setName(name);
         this.setTeacherName(teacherName);
         this.setYear(year);
+        this.setFullTime(fullTime);
         this.timetable = timetable;
     }
 
     public String toString() {
-        return this.getName() + " (" + this.getTerm().getDay() + " " + this.getTerm() + ")\n" +
-                this.getYear() + " " + (this.isFull_time() ? "Stacjonarne" : "Niestacjonarne") + "\n" +
-                this.getTeacherName();
+        String fullTime = this.fullTime ? "Stacjonarne" : "Niestacjonarne";
+        return String.format("%s (%s %s)\nRok %d %s\n%s", this.name, this.term.getDay(), this.term, this.year, fullTime, this.teacherName);
     }
 
     public boolean earlierDay() {
-        if (this.getTerm().getDay().prevDay().ordinal() >= Day.MON.ordinal() && this.getTerm().getDay().prevDay().ordinal() <= Day.THU.ordinal()) {
-            this.getTerm().setDay(this.getTerm().getDay().prevDay());
-            return timetable.canBeTransferredTo(new Term(this.getTerm().getHour(), this.getTerm().getMinute(), this.getTerm().getDay().prevDay()), this.isFull_time());
+        Term prevDayTerm = new Term(this.term.getHour(), this.term.getMinute(), this.term.getDay().prevDay());
+
+        if (this.fullTime && prevDayTerm.getDay() == Day.SUN) prevDayTerm.setDay(Day.FRI);
+        if (!this.fullTime && prevDayTerm.getDay() == Day.THU) prevDayTerm.setDay(Day.SUN);
+
+        if (this.timetable.canBeTransferredTo(prevDayTerm, this.fullTime)) {
+            this.term = prevDayTerm;
+            return true;
         }
-        if (this.getTerm().getDay() == Day.MON && this.getTerm().laterThan(new Term(8, 0)) && this.getTerm().earlierThan(new Term(17, 0))) {
-            this.getTerm().setDay(Day.FRI);
-            return timetable.canBeTransferredTo(new Term(this.getTerm().getHour(), this.getTerm().getMinute(), this.getTerm().getDay().prevDay()), this.isFull_time());
-        }
+
         return false;
     }
 
     public boolean laterDay() {
-        if (this.getTerm().getDay().nextDay().ordinal() >= Day.TUE.ordinal() && this.getTerm().getDay().nextDay().ordinal() <= Day.THU.ordinal()) {
-            this.getTerm().setDay(this.getTerm().getDay().nextDay());
-            return timetable.canBeTransferredTo(new Term(this.getTerm().getHour(), this.getTerm().getMinute(), this.getTerm().getDay().nextDay()), this.isFull_time());
+        Term nextDayTerm = new Term(this.term.getHour(), this.term.getMinute(), this.term.getDay().nextDay());
+
+        if (this.fullTime && nextDayTerm.getDay() == Day.SAT) nextDayTerm.setDay(Day.MON);
+        if (!this.fullTime && nextDayTerm.getDay() == Day.MON) nextDayTerm.setDay(Day.FRI);
+
+        if (this.timetable.canBeTransferredTo(nextDayTerm, this.fullTime)) {
+            this.term = nextDayTerm;
+            return true;
         }
-        if (this.getTerm().getDay() == Day.FRI) {
-            this.getTerm().setDay(Day.MON);
-            return timetable.canBeTransferredTo(new Term(this.getTerm().getHour(), this.getTerm().getMinute(), this.getTerm().getDay().nextDay()), this.isFull_time());
-        }
-        if (this.getTerm().getDay() == Day.THU && this.getTerm().laterThan(new Term(8, 0)) && this.getTerm().earlierThan(new Term(17, 0))) {
-            this.getTerm().setDay(Day.MON);
-            return timetable.canBeTransferredTo(new Term(this.getTerm().getHour(), this.getTerm().getMinute(), this.getTerm().getDay().nextDay()), this.isFull_time());
-        }
+
         return false;
     }
 
     public boolean earlierTime() {
-        int m = this.getTerm().getHour() * 60 + this.getTerm().getMinute() - this.getTerm().getDuration();
-        Term newTerm = new Term((m - m % 60) / 60,m % 60, this.getTerm().getDay());
-        if ((newTerm.laterThan(new Term(8,0)) && newTerm.earlierThan(new Term(17,0)) && newTerm.getDay() == Day.FRI)
-                || (newTerm.laterThan(new Term(8,0)) && newTerm.earlierThan(new Term(20,0)) && newTerm.getDay().ordinal() >= Day.MON.ordinal() && newTerm.getDay().ordinal() <= Day.THU.ordinal())) {
+        int thisTimeInMinutes = this.term.getHour() * 60 + this.term.getMinute();
+        int prevTermTimeInMinutes = thisTimeInMinutes - this.term.getDuration();
 
-            if (timetable.canBeTransferredTo(newTerm, this.isFull_time())) {
-                this.setTerm(newTerm);
-                return true;
-            }
+        int prevTermMinute = prevTermTimeInMinutes % 60;
+        int prevTermHour = (prevTermTimeInMinutes - prevTermMinute) / 60;
+        Term prevTerm = new Term(prevTermHour, prevTermMinute, this.term.getDay());
 
+        if (this.timetable instanceof TimetableWithBreaks) {
             if (TimetableWithBreaks.skipBreaks) {
+                prevTerm = ((TimetableWithBreaks) this.timetable).getBreakBeforeLesson(term).getTerm().endTerm();
+            } else
+                return false;
+        }
+        prevTerm.setDay(this.term.getDay());
 
-            }
+        if (this.timetable.canBeTransferredTo(prevTerm, this.fullTime)) {
+            this.term = prevTerm;
+            return true;
         }
 
         return false;
     }
 
     public boolean laterTime() {
-        int m = this.getTerm().getHour() * 60 + this.getTerm().getMinute() + this.getTerm().getDuration();
-        Term newTerm = new Term((m - m % 60) / 60,m % 60, this.getTerm().getDay());
-        if ((newTerm.laterThan(new Term(8,0)) && newTerm.earlierThan(new Term(17,0)) && newTerm.getDay() == Day.FRI)
-                || (newTerm.laterThan(new Term(8,0)) && newTerm.earlierThan(new Term(20,0)) && newTerm.getDay().ordinal() >= Day.MON.ordinal() && newTerm.getDay().ordinal() <= Day.THU.ordinal())) {
-            if (timetable.canBeTransferredTo(newTerm, this.isFull_time())) {
-                this.setTerm(newTerm);
-                return true;
-            }
+        int thisTimeInMinutes = this.term.getHour() * 60 + this.term.getMinute();
+        int nextTermTimeInMinutes = thisTimeInMinutes + this.term.getDuration();
+
+        int nextTermMinute = nextTermTimeInMinutes % 60;
+        int nextTermHour = (nextTermTimeInMinutes - nextTermMinute) / 60;
+        Term nextTerm = new Term(nextTermHour, nextTermMinute, this.term.getDay());
+
+        if (this.timetable instanceof TimetableWithBreaks) {
+            if (TimetableWithBreaks.skipBreaks) {
+                nextTerm = ((TimetableWithBreaks) this.timetable).getBreakAfterLesson(term).getTerm().endTerm();
+            } else
+                return false;
+        }
+        nextTerm.setDay(term.getDay());
+
+        if (this.timetable.canBeTransferredTo(nextTerm, this.fullTime)) {
+            this.term = nextTerm;
+            return true;
         }
 
         return false;
@@ -122,11 +138,11 @@ public class Lesson {
         this.year = year;
     }
 
-    public boolean isFull_time() {
-        return full_time;
+    public boolean isFullTime() {
+        return fullTime;
     }
 
-    public void setFull_time(boolean full_time) {
-        this.full_time = full_time;
+    public void setFullTime(boolean fullTime) {
+        this.fullTime = fullTime;
     }
 }
