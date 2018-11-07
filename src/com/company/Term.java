@@ -1,6 +1,6 @@
 package com.company;
 
-public class Term extends BasicTerm{
+public class Term extends BasicTerm {
     private Day day;
 
     Term(int hour, int minute) {
@@ -63,5 +63,21 @@ public class Term extends BasicTerm{
 
     public void setDay(Day day) {
         this.day = day;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Term)) return false;
+
+        Term term = (Term) o;
+
+        return day == term.day && this.equals(term);
+    }
+
+    @Override
+    public int hashCode() {
+        return day != null ? day.hashCode() : 0;
     }
 }

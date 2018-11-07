@@ -11,6 +11,7 @@ public class BasicTerm {
     }
 
     public void setHour(int hour) {
+        if (hour > 23) throw new IllegalArgumentException("Hour cannot be larger than 23");
         this.hour = hour;
     }
 
@@ -19,6 +20,7 @@ public class BasicTerm {
     }
 
     public void setMinute(int minute) {
+        if (minute > 59) throw new IllegalArgumentException("Minute cannot be larger than 59");
         this.minute = minute;
     }
 
@@ -32,7 +34,7 @@ public class BasicTerm {
 
     //returns Term when this term is ending
     public Term endTerm() {
-        int thisTimeInMinutes = this.getHour() * 60  + this.getMinute();
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
         int resultTimeInMinutes = thisTimeInMinutes + this.getDuration();
 
         int resultMinute = resultTimeInMinutes % 60;

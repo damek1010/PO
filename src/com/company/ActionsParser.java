@@ -18,6 +18,8 @@ public class ActionsParser {
                 case "t+":
                     result[counter++] = Action.TIME_LATER;
                     break;
+                default:
+                    throw new IllegalArgumentException("Translation " + element + " is incorrect");
             }
         }
         return result;

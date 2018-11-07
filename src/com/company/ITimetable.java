@@ -35,7 +35,7 @@ public interface ITimetable {
     The added  lesson
      @return True if the lesson was added.  The lesson cannot be placed if the imetable slot is already occupied.
      */
-    boolean put(Lesson lesson);
+    boolean put(Lesson lesson) throws IllegalArgumentException;
 
     /*************************************/
     /**

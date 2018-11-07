@@ -28,8 +28,4 @@ public enum Day {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public Boolean inRange(Day from, Day to) {
-        return this.ordinal() >= from.ordinal() && this.ordinal() <= to.ordinal();
-    }
 }

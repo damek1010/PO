@@ -1,12 +1,14 @@
 package com.company;
 
-public class Lesson {
+public class Lesson implements Observer {
     private Term term;
     private String name;
     private String teacherName;
     private int year;
     private boolean fullTime;
     private ITimetable timetable;
+
+    private Observer observer;
 
     Lesson(Term term, String name, String teacherName, int year, boolean fullTime) {
         this.setTerm(term);
@@ -144,5 +146,10 @@ public class Lesson {
 
     public void setFullTime(boolean fullTime) {
         this.fullTime = fullTime;
+    }
+
+    @Override
+    public void update() {
+
     }
 }

@@ -1,13 +1,11 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
-public class Timetable implements ITimetable {
-
-    private ArrayList<Lesson> lessons;
-
+public class Timetable extends AbstractTimetable {
     public Timetable() {
-        lessons = new ArrayList<>();
+        lessons = new LinkedHashMap<>();
     }
 
     @Override
@@ -43,49 +41,6 @@ public class Timetable implements ITimetable {
     @Override
     public boolean busy(Term term) {
         return this.get(term) != null;
-    }
-
-    @Override
-    public boolean put(Lesson lesson) {
-        if (!this.busy(lesson.getTerm())) {
-            lessons.add(lesson);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void perform(Action[] actions) {
-        int id = 0;
-
-        for (Action action : actions) {
-            switch (action) {
-                case DAY_LATER:
-                    lessons.get(id).laterDay();
-                    break;
-                case DAY_EARLIER:
-                    lessons.get(id).earlierDay();
-                    break;
-                case TIME_LATER:
-                    lessons.get(id).laterTime();
-                    break;
-                case TIME_EARLIER:
-                    lessons.get(id).earlierTime();
-                    break;
-            }
-            id++;
-            id = id % lessons.size();
-        }
-    }
-
-    @Override
-    public Object get(Term term) {
-        for (Lesson lesson : lessons) {
-            if (lesson.getTerm().equals(term)) {
-                return lesson;
-            }
-        }
-        return null;
     }
 
     public String toString() {
