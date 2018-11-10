@@ -1,5 +1,6 @@
 package com.company;
 
+<<<<<<< Updated upstream
 public class Lesson implements Observer {
     private Term term;
     private String name;
@@ -25,6 +26,20 @@ public class Lesson implements Observer {
         this.setYear(year);
         this.setFullTime(fullTime);
         this.timetable = timetable;
+=======
+public class Lesson {
+    Term term;
+    String name;
+    String teacherName;
+    int year;
+    boolean full_time;
+
+    public Lesson(Term term, String name, String teacherName, int year) {
+        this.term = term;
+        this.name = name;
+        this.teacherName = teacherName;
+        this.year = year;
+>>>>>>> Stashed changes
     }
 
     public String toString() {
