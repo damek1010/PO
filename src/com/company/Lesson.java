@@ -1,6 +1,6 @@
 package com.company;
 
-public class Lesson implements Observer {
+public class Lesson implements Subject {
     private Term term;
     private String name;
     private String teacherName;
@@ -18,13 +18,14 @@ public class Lesson implements Observer {
         this.setFullTime(fullTime);
     }
 
-    Lesson(ITimetable timetable, Term term, String name, String teacherName, int year, boolean fullTime) {
+    Lesson(AbstractTimetable timetable, Term term, String name, String teacherName, int year, boolean fullTime) {
         this.setTerm(term);
         this.setName(name);
         this.setTeacherName(teacherName);
         this.setYear(year);
         this.setFullTime(fullTime);
         this.timetable = timetable;
+        this.addObserver(timetable);
     }
 
     public String toString() {
@@ -40,6 +41,7 @@ public class Lesson implements Observer {
 
         if (this.timetable.canBeTransferredTo(prevDayTerm, this.fullTime)) {
             this.term = prevDayTerm;
+            this.notifyObserver();
             return true;
         }
 
@@ -54,6 +56,7 @@ public class Lesson implements Observer {
 
         if (this.timetable.canBeTransferredTo(nextDayTerm, this.fullTime)) {
             this.term = nextDayTerm;
+            this.notifyObserver();
             return true;
         }
 
@@ -78,6 +81,7 @@ public class Lesson implements Observer {
 
         if (this.timetable.canBeTransferredTo(prevTerm, this.fullTime)) {
             this.term = prevTerm;
+            this.notifyObserver();
             return true;
         }
 
@@ -102,6 +106,7 @@ public class Lesson implements Observer {
 
         if (this.timetable.canBeTransferredTo(nextTerm, this.fullTime)) {
             this.term = nextTerm;
+            this.notifyObserver();
             return true;
         }
 
@@ -149,7 +154,17 @@ public class Lesson implements Observer {
     }
 
     @Override
-    public void update() {
+    public void addObserver(Observer observer) {
+        this.observer = observer;
+    }
 
+    @Override
+    public void removeObserver(Observer observer) {
+        this.observer = null;
+    }
+
+    @Override
+    public void notifyObserver() {
+        this.observer.update();
     }
 }
