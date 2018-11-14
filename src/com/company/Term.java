@@ -3,8 +3,7 @@ package com.company;
 public class Term extends BasicTerm {
     private Day day;
 
-<<<<<<< Updated upstream
-    Term(int hour, int minute) {
+    public Term(int hour, int minute) {
         this.setHour(hour);
         this.setMinute(minute);
         this.setDuration(90);
@@ -16,24 +15,11 @@ public class Term extends BasicTerm {
         this.setDuration(duration);
     }
 
-    Term(int hour, int minute, Day day) {
+    public Term(int hour, int minute, Day day) {
         this.setHour(hour);
         this.setMinute(minute);
         this.setDuration(90);
         this.setDay(day);
-=======
-    public Term(int hour, int minute) {
-        this.hour = hour;
-        this.minute = minute;
-        this.duration = 90;
-    }
-
-    public Term(int hour, int minute, Day day) {
-        this.hour = hour;
-        this.minute = minute;
-        this.duration = 90;
-        this.day = day;
->>>>>>> Stashed changes
     }
 
     public String toString() {
@@ -41,7 +27,6 @@ public class Term extends BasicTerm {
     }
 
     public Boolean earlierThan(Term other) {
-<<<<<<< Updated upstream
         int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
         int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
         return thisTimeInMinutes <= otherTimeInMinutes;
@@ -51,17 +36,6 @@ public class Term extends BasicTerm {
         int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
         int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
         return thisTimeInMinutes >= otherTimeInMinutes;
-=======
-        int thisMin = 60 * this.hour + this.minute;
-        int otherMin = 60 * other.hour + other.minute;
-        return thisMin < otherMin;
-    }
-
-    public Boolean laterThan(Term other) {
-        int thisMin = 60 * this.hour + this.minute;
-        int otherMin = 60 * other.hour + other.minute;
-        return thisMin > otherMin;
->>>>>>> Stashed changes
     }
 
     //returns term with duration that equals difference between "other" and this time

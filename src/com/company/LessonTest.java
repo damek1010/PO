@@ -12,8 +12,8 @@ public class LessonTest {
 
     @Before
     public void setUp() {
-        lessonTUE = new Lesson(new Term(8, 0, Day.TUE), "PO", "Jan Kowalski", 2);
-        lessonMON = new Lesson(new Term(20, 0, Day.MON), "PO", "Jan Kowalski", 2);
+        lessonTUE = new Lesson(new Term(8, 0, Day.TUE), "PO", "Jan Kowalski", 2, false);
+        lessonMON = new Lesson(new Term(20, 0, Day.MON), "PO", "Jan Kowalski", 2, false);
     }
 
     @Test
