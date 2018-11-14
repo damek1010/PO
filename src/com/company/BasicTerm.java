@@ -1,6 +1,6 @@
 package com.company;
 
-public class BasicTerm {
+public class BasicTerm implements Comparable{
     protected int hour;
     protected int minute;
     protected int duration;
@@ -32,6 +32,18 @@ public class BasicTerm {
         this.duration = duration;
     }
 
+    public Boolean earlierThan(Term other) {
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
+        return thisTimeInMinutes <= otherTimeInMinutes;
+    }
+
+    public Boolean laterThan(Term other) {
+        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
+        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
+        return thisTimeInMinutes >= otherTimeInMinutes;
+    }
+
     //returns Term when this term is ending
     public Term endTerm() {
         int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
@@ -41,5 +53,15 @@ public class BasicTerm {
         int resultHour = (resultTimeInMinutes - resultMinute) / 60;
 
         return new Term(resultHour, resultMinute);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (this == o) return 0;
+
+        Term term = (Term) o;
+        if (this.laterThan(term)) return 1;
+        if (this.earlierThan(term)) return -1;
+        return 0;
     }
 }

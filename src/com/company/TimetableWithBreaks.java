@@ -3,6 +3,7 @@ package com.company;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 public class TimetableWithBreaks extends AbstractTimetable {
     private static Break[] breaks;
@@ -12,7 +13,7 @@ public class TimetableWithBreaks extends AbstractTimetable {
     public TimetableWithBreaks(Break[] breaks) {
         TimetableWithBreaks.breaks = breaks;
         TimetableWithBreaks.skipBreaks = true;
-        lessons = new LinkedHashMap<>();
+        lessons = new TreeMap<>();
     }
 
     public Break getBreakAfterLesson(Term term) {

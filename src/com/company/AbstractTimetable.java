@@ -3,7 +3,11 @@ package com.company;
 import java.util.*;
 
 public abstract class AbstractTimetable implements ITimetable, Observer {
-    protected LinkedHashMap<Term, Lesson> lessons;
+    public TreeMap<Term, Lesson> getLessons() {
+        return lessons;
+    }
+
+    protected TreeMap<Term, Lesson> lessons;
 
     @Override
     public boolean put(Lesson lesson) {

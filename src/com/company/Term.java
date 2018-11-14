@@ -1,6 +1,6 @@
 package com.company;
 
-public class Term extends BasicTerm {
+public class Term extends BasicTerm implements Comparable {
     private Day day;
 
     public Term(int hour, int minute) {
@@ -24,18 +24,6 @@ public class Term extends BasicTerm {
 
     public String toString() {
         return String.format("%02d:%02d [%d]", this.hour, this.minute, this.duration);
-    }
-
-    public Boolean earlierThan(Term other) {
-        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
-        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
-        return thisTimeInMinutes <= otherTimeInMinutes;
-    }
-
-    public Boolean laterThan(Term other) {
-        int thisTimeInMinutes = this.getHour() * 60 + this.getMinute();
-        int otherTimeInMinutes = other.getHour() * 60 + other.getMinute();
-        return thisTimeInMinutes >= otherTimeInMinutes;
     }
 
     //returns term with duration that equals difference between "other" and this time
@@ -79,5 +67,15 @@ public class Term extends BasicTerm {
     @Override
     public int hashCode() {
         return day != null ? day.hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (this == o) return 0;
+
+        Term term = (Term) o;
+        if (this.day.ordinal() > term.getDay().ordinal()) return 1;
+        if (this.day.ordinal() < term.getDay().ordinal()) return -1;
+        return super.compareTo(o);
     }
 }

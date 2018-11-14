@@ -2,10 +2,11 @@ package com.company;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 public class Timetable extends AbstractTimetable {
     public Timetable() {
-        lessons = new LinkedHashMap<>();
+        lessons = new TreeMap<>();
     }
 
     @Override

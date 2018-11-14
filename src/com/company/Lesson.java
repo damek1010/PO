@@ -1,6 +1,6 @@
 package com.company;
 
-public class Lesson implements Subject {
+public class Lesson implements Subject, VisitableTimetableElement {
     private Term term;
     private String name;
     private String teacherName;
@@ -166,5 +166,10 @@ public class Lesson implements Subject {
     @Override
     public void notifyObserver() {
         this.observer.update();
+    }
+
+    @Override
+    public void accept(TimetableElementVisitor visitor) {
+        visitor.visit(this);
     }
 }
